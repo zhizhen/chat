@@ -14,9 +14,16 @@ load(Opts) ->
 
 message_published(Message = #mqtt_message{id = MsgId, qos = 1,
                                           from = ClientId,
-                                          topic = Topic = <<"chat/", _To/binary>>},
+                                          topic = Topic = <<"chat/user/", _To/binary>>},
                   _Opts) ->
     lager:info("chat message : ~p~n", [{Message}]),
+    case emqttd_cm:lookup(ClientId) of
+        #mqtt_client{username = Username} ->
+            SyncKey = #slimchat_synckey{client = ClientId, username = Username, pubsub = publish, topic = Topic},
+            chat_sync:store(SyncKey, MsgId);
+        undefined ->
+            lager:error("cannot find client: ~s", [ClientId])
+    end,
     {ok, Message};
 
 message_published(Message, _Opts) ->
