@@ -26,7 +26,7 @@ client_sync(0, #mqtt_client{client_id   = ClientId,
     Task = fun() ->
                    SessPid = emqttd_client:session(ClientPid),
                    SyncMsgs = lists:qppend([chat_backend:sync_messages(SyncKey, Offset) ||
-                                            #chat_sync{synckey = SyncKey, offset = Offset} <- SyncRecords]),
+                                            #slimchat_sync{synckey = SyncKey, offset = Offset} <- SyncRecords]),
                    lists:foreach(fun(Msg) -> SessPid ! {dispatch, Msg} end, lists:sort(Sort, SyncMsgs))
            end,
     emqttd_pooler:async_submit(Task);
