@@ -6,11 +6,11 @@
 
 -behaviour(emqttd_gen_mod).
 
--export([load/1, message_published/2, message_acked/3, unload/1]).
+-export([load/1, message_published/2, message_acked/4, unload/1]).
 
 load(Opts) ->
     emqttd:hook('message.publish', fun ?MODULE:message_published/2, [Opts]),
-    emqttd:hook('message.acked', fun ?MODULE:message_acked/3, [Opts]).
+    emqttd:hook('message.acked', fun ?MODULE:message_acked/4, [Opts]).
 
 message_published(Message = #mqtt_message{id = MsgId, qos = 1,
                                           from = ClientId,
@@ -30,11 +30,11 @@ message_published(Message, _Opts) ->
     %lager:info("unhandled message published : ~p~n", [{Message, _Opts}]),
     {ok, Message}.
 
-message_acked(_ClientId, _Message, _Opts) ->
-    lager:info("unhandled message acked : ~p~n", [{_ClientId, _Message, _Opts}]),
+message_acked(_ClientId, _Username, _Message, _Opts) ->
+    lager:info("unhandled message acked : ~p~n", [{_ClientId, _Username, _Message, _Opts}]),
     ok.
 
 unload(_Opts) ->
     emqttd:unhook('message.publish', fun ?MODULE:message_published/2),
-    emqttd:unhook('message.acked', fun ?MODULE:message_acked/3).
+    emqttd:unhook('message.acked', fun ?MODULE:message_acked/4).
 

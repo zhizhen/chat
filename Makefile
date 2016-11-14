@@ -7,3 +7,8 @@ get-deps:
 
 compile:
 	@$(REBAR) compile
+
+gen:
+	@$(REBAR) compile
+	@$(REBAR) generate
+

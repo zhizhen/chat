@@ -1,3 +1,4 @@
+-define(EMPTY(Field), ((Field =:= undefined) orelse (Field =:= <<>>))).
 -record(slimchat_contact, {username, nick,
                            group = <<"friend">>,
                            presence = offline,
