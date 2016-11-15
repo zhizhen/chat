@@ -9,4 +9,7 @@ ebin
 rel/example_project
 .concrete/DEV_MODE
 .rebar
-rel/chat
+_rel/
+chat.d
+.erlang.mk/
+data/

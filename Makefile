@@ -1,14 +1,9 @@
-REBAR=./rebar
+PROJECT = chat
+PROJECT_DESCRIPTION = MQTT chat server
+PROJECT_VERSION = 0.1
 
-all: get-deps compile
+DEPS = esockd emqttd
+dep_esockd = git https://github.com/emqtt/esockd emq20
+dep_emqttd = git https://github.com/emqtt/emqttd master
 
-get-deps:
-	@$(REBAR) get-deps
-
-compile:
-	@$(REBAR) compile
-
-gen:
-	@$(REBAR) compile
-	@$(REBAR) generate
-
+include erlang.mk

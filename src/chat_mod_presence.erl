@@ -15,7 +15,7 @@ load(Opts) ->
 client_online(0, #mqtt_client{username = Username}, _Opts)
     when ?EMPTY(Username) -> ok;
 
-client_online(0, Mqttc = #mqtt_client{client_id  = ClientId,
+client_online(0, Mqttc = #mqtt_client{client_id  = _ClientId,
                                       client_pid = ClientPid,
                                       username   = Username}, Opts) ->
     %% Subscribe
@@ -26,10 +26,10 @@ client_online(0, Mqttc = #mqtt_client{client_id  = ClientId,
            Topics
     end || U <- get_friend_list(Username)],
     lager:info("topisc : ~p~n", [{R}]),
-    %chat_mod_sync:client_sync(Mqttc, Opts),
+    chat_mod_sync:client_sync(Mqttc, Opts),
     ok.
 
-client_offline(_Reason, ClientId, _Opts) ->
+client_offline(_Reason, _ClientId, _Opts) ->
     ok.
 
 unload(_Opts) ->

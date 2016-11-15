@@ -68,7 +68,7 @@ handle_info({publish, Topic, Payload}, State) ->
     {noreply, State};
 
 %% Client connected
-handle_info({mqttc, C, connected}, State = #state{mqttc = C, client = Uidstr}) ->
+handle_info({mqttc, C, connected}, State = #state{mqttc = C}) ->
     io:format("Client ~p is connected~n", [C]),
 %    emqttc:subscribe(C, <<"/sys/", Uidstr/binary, "/r">>, 1),
 %    emqttc:subscribe(C, <<"/sys/", Uidstr/binary, "/w">>, 1),

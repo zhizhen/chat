@@ -7,7 +7,7 @@
 
 -export([client_sync/2]).
 
-client_sync(#mqtt_client{client_id   = ClientId,
+client_sync(#mqtt_client{client_id   = _ClientId,
                          client_pid  = ClientPid,
                          username    = Username}, _Opts) ->
     %SyncRecords = chat_sync:fetch(ClientId, Username),
