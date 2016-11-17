@@ -827,4 +827,123 @@
                     cuttlefish:conf_get("sysmon.busy_dist_port", Conf)}]
     end}.
 
+%%--------------------------------------------------------------------
+%% chat Listeners
+%%--------------------------------------------------------------------
+
+{mapping, "chat.broker", "chat.broker", [
+        {default, "127.0.0.1:1883"},
+        {datatype, string}
+    ]}.
+
+
+{mapping, "chat.listener.http", "chat.listeners", [
+        {default, 1883},
+        {datatype, [integer, ip]}
+    ]}.
+
+{mapping, "chat.listener.http.acceptors", "chat.listeners", [
+        {default, 8},
+        {datatype, integer}
+    ]}.
+
+{mapping, "chat.listener.http.max_clients", "chat.listeners", [
+        {default, 1024},
+        {datatype, integer}
+    ]}.
+
+
+{translation, "chat.listeners", fun(Conf) ->
+            Filter  = fun(Opts) -> [{K, V} || {K, V} <- Opts, V =/= undefined] end,
+            LisOpts = fun(Prefix) ->
+                    Filter([{acceptors,
+                                cuttlefish:conf_get(Prefix ++
+                                    ".acceptors", Conf)},
+                            {max_clients,
+                                cuttlefish:conf_get(Prefix ++ ".max_clients", Conf)},
+                            {rate_limt,   cuttlefish:conf_get(Prefix ++
+                                    ".rate_limit", Conf, undefined)}])
+            end,
+            TcpOpts = fun(Prefix) ->
+                    Filter([{backlog,
+                                cuttlefish:conf_get(Prefix
+                                    ++ ".backlog", Conf,
+                                    undefined)},
+                            {recbuf,
+                                cuttlefish:conf_get(Prefix ++ ".recbuf", Conf, undefined)},
+                            {sndbuf,  cuttlefish:conf_get(Prefix ++ ".sndbuf",
+                                    Conf, undefined)},
+                            {buffer,
+                                cuttlefish:conf_get(Prefix ++ ".buffer", Conf, undefined)},
+                            {nodelay, cuttlefish:conf_get(Prefix ++ ".nodelay",
+                                    Conf, true)}])
+            end,
+            SslOpts = fun(Prefix) ->
+                    Filter([{handshake_timeout,
+                                cuttlefish:conf_get(Prefix
+                                    ++
+                                    ".handshake_timeout",
+                                    Conf) * 1000},
+                            {keyfile,
+                                cuttlefish:conf_get(Prefix ++ ".keyfile", Conf, undefined)},
+                            {certfile,   cuttlefish:conf_get(Prefix ++
+                                    ".certfile", Conf, undefined)},
+                            {cacertfile,
+                                cuttlefish:conf_get(Prefix ++ ".cacertfile", Conf, undefined)},
+                            {verify,     cuttlefish:conf_get(Prefix ++ ".verify",
+                                    Conf, undefined)},
+                            {fail_if_no_peer_cert,
+                                cuttlefish:conf_get(Prefix ++ ".fail_if_no_peer_cert", Conf, undefined)}])
+            end,
+
+            Listeners = fun(Name) when is_atom(Name) ->
+                    Key = "chat.listener."
+                    ++ atom_to_list(Name),
+                    case
+                        cuttlefish:conf_get(Key,
+                            Conf,
+                            undefined) of
+                        undefined
+                        ->
+                            [];
+                        Port ->
+                            ConnOpts =
+                            Filter([{rate_limit,
+                                        cuttlefish:conf_get(Key
+                                            ++
+                                            ".rate_limit",
+                                            Conf,
+                                            undefined)}]),
+                            Opts =
+                            [{connopts,
+                                    ConnOpts},
+                                {sockopts,
+                                    TcpOpts(Key)}
+                                | LisOpts(Key)],
+                            [{Name, Port,
+                                    case Name
+                                        =:= ssl
+                                        orelse
+                                        Name
+                                        =:=
+                                        https
+                                        of
+                                        true
+                                        ->
+                                            [{ssl,
+                                                    SslOpts(Key)}
+                                                | Opts];
+                                        false
+                                        ->
+                                            Opts
+                                    end}]
+                    end
+            end,
+            lists:append([Listeners(tcp),
+                    Listeners(ssl),
+                    Listeners(http),
+                    Listeners(https)])
+    end}.
+
+
 

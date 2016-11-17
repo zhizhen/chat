@@ -1,29 +1,29 @@
 -define(EMPTY(Field), ((Field =:= undefined) orelse (Field =:= <<>>))).
--record(slimchat_contact, {username, nick,
+-record(chat_contact, {username, nick,
                            group = <<"friend">>,
                            presence = offline,
                            show = unavailable,
                            status = <<"">>,
                            avatar}).
 
--record(slimchat_roster, {uname, cname}).
+-record(chat_roster, {uname, cname}).
 
--record(slimchat_room, {name, nick,
+-record(chat_room, {name, nick,
                         topic,
                         avatar}).
 
--record(slimchat_member, {room, uname}).
+-record(chat_member, {room, uname}).
 
--record(slimchat_synckey, {client   :: binary(),
+-record(chat_synckey, {client   :: binary(),
                            username :: binary(),
                            pubsub   :: publish | subscribe,
                            topic    :: binary()}).
 
--type slimchat_synckey() :: #slimchat_synckey{}.
+-type chat_synckey() :: #chat_synckey{}.
 
--record(slimchat_sync, {synckey :: #slimchat_synckey{},
+-record(chat_sync, {synckey :: #chat_synckey{},
                         offset  :: pos_integer()}).
 
--type slimchat_sync() :: #slimchat_sync{}.
+-type chat_sync() :: #chat_sync{}.
 
 

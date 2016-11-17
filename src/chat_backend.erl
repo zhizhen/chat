@@ -20,13 +20,13 @@
 
 -callback ack_message(ClientId :: binary(), mqtt_message()) -> ok | {error, any()}.
 
--callback sync_messages(slimchat_synckey(), binary()) -> [mqtt_message()].
+-callback sync_messages(chat_synckey(), binary()) -> [mqtt_message()].
 
 -callback find_offline_msg(To :: binary()) -> [mqtt_message()]}.
 
--callback find_contacts(Username:: binary()) -> [slimchat_contact()].
+-callback find_contacts(Username:: binary()) -> [chat_contact()].
 
--callback find_rooms(Username:: binary()) -> [slimchat_room()].
+-callback find_rooms(Username:: binary()) -> [chat_room()].
 
 -else.
 
@@ -69,7 +69,7 @@ sync_messages(SyncKey, Offset) ->
 unload() ->
     with_backend(onunload, []).
 
-to_list(#slimchat_contact{username = Name,
+to_list(#chat_contact{username = Name,
                           nick = Nick,
                           group = Group,
                           presence = Presence,
@@ -80,7 +80,7 @@ to_list(#slimchat_contact{username = Name,
      {presence, Presence},
      {show, Show}, {status, Status}];
 
-to_list(#slimchat_room{name = Name, nick = Nick}) ->
+to_list(#chat_room{name = Name, nick = Nick}) ->
     [{id, Name}, {nick, Nick}, {avatar, <<"">>}].
 
 %%%=============================================================================
@@ -88,7 +88,8 @@ to_list(#slimchat_room{name = Name, nick = Nick}) ->
 %%%=============================================================================
 
 with_backend(Fun, Args) ->
-    {ok, {Backend, _Env}} = application:get_env(chat, backend),
+    %{ok, {Backend, _Env}} = application:get_env(chat, backend, {mnesia, []}),
+    Backend = mnesia,
     apply(backend_mod(Backend), Fun, Args).
 
 backend_mod(Backend) ->

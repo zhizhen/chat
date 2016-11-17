@@ -23,8 +23,8 @@ mnesia(boot) ->
     ok = emqttd_mnesia:create_table(chat_sync, [
                 {type, ordered_set},
                 {ram_copies, [node()]},
-                {record_name, slimchat_sync},
-                {attributes, record_info(fields, slimchat_sync)}]);
+                {record_name, chat_sync},
+                {attributes, record_info(fields, chat_sync)}]);
 
 mnesia(copy) ->
     ok = emqttd_mnesia:copy_table(chat_sync).
@@ -36,13 +36,13 @@ mnesia(copy) ->
 start_link(I) ->
     gen_server:start_link(?MODULE, [I], []).
 
-store(SyncKey = #slimchat_synckey{client = ClientId}, Offset) ->
+store(SyncKey = #chat_synckey{client = ClientId}, Offset) ->
     Pid = gproc_pool:pick_worker(?MODULE, ClientId),
     gen_server:cast(Pid, {store, SyncKey, Offset}).
 
 fetch(ClientId, Username) ->
-    SyncKey = #slimchat_synckey{client = ClientId, username = Username, _ = '_'},
-    mnesia:dirty_match_object(#slimchat_sync{synckey = SyncKey, _ = '_'}).
+    SyncKey = #chat_synckey{client = ClientId, username = Username, _ = '_'},
+    mnesia:dirty_match_object(#chat_sync{synckey = SyncKey, _ = '_'}).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
@@ -55,7 +55,7 @@ handle_call(_Req, _From, State) ->
     {reply, ok, State}.
 
 handle_cast({store, SyncKey, Offset}, State) ->
-    mnesia:dirty_write(#slimchat_sync{synckey = SyncKey, offset = Offset}),
+    mnesia:dirty_write(#chat_sync{synckey = SyncKey, offset = Offset}),
     {noreply, State}.
 
 handle_info(_Info, State) ->
