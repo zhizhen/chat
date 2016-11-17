@@ -52,5 +52,4 @@ g(Name, Params) ->
 
 jsonReply(Req, Data) ->
     Json = mochijson2:encode(Data),
-    lager:info("json reply: ~p~n", [{Data, Json}]),
     Req:ok({"application/json", Json}).

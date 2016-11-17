@@ -12,14 +12,14 @@ load(Opts) ->
     emqttd:hook('client.disconnected', fun ?MODULE:client_offline/3, [Opts]).
 
 
-client_online(0, #mqtt_client{username = Username}, _Opts)
+client_online(_, #mqtt_client{username = Username}, _Opts)
     when ?EMPTY(Username) -> ok;
 
-client_online(0, Mqttc = #mqtt_client{client_id  = ClientId,
+client_online(Qos, Mqttc = #mqtt_client{client_id  = ClientId,
                                       client_pid = ClientPid,
                                       username   = Username}, Opts) ->
     %% Subscribe
-    lager:info("client online :~p~n", [{Username}]),
+    lager:info("client online :~p~n", [{Qos, Username}]),
     emqttd_client:subscribe(ClientPid, [
                 {<<"/sys/", ClientId/binary, "/r">>, 0},
                 {<<"/sys/broadcast">>, 0}]).

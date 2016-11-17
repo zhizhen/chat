@@ -13,8 +13,8 @@ load(Opts) ->
     emqttd:hook('message.acked', fun ?MODULE:message_acked/4, [Opts]).
 
 message_published(Message = #mqtt_message{id = MsgId, qos = 1,
-                                          from = ClientId,
-                                          topic = Topic = <<"chat/user/", _To/binary>>},
+                                          from = {ClientId, Username},
+                                          topic = Topic = <<"/sys/", _To/binary>>},
                   _Opts) ->
     lager:info("chat message : ~p~n", [{Message}]),
     case emqttd_cm:lookup(ClientId) of
