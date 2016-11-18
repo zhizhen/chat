@@ -12,11 +12,14 @@ load(Opts) ->
     emqttd:hook('message.publish', fun ?MODULE:message_published/2, [Opts]),
     emqttd:hook('message.acked', fun ?MODULE:message_acked/4, [Opts]).
 
-message_published(Message = #mqtt_message{id = MsgId, qos = 1,
-                                          from = {ClientId, Username},
-                                          topic = Topic = <<"/sys/", _To/binary>>},
-                  _Opts) ->
-    lager:info("chat message : ~p~n", [{Message}]),
+message_published(Message = #mqtt_message{
+        id = MsgId, qos = 1,
+        from = {ClientId, Username},
+        topic = Topic = <<"/sys/", _To/binary>>,
+        payload = PayLoad}, _Opts) ->
+
+    Data = chat_json:decode(binary_to_list(PayLoad)),
+    lager:info("chat message : ~p~n", [{Data}]),
     case emqttd_cm:lookup(ClientId) of
         #mqtt_client{username = Username} ->
             SyncKey = #chat_synckey{client = ClientId, username = Username, pubsub = publish, topic = Topic},

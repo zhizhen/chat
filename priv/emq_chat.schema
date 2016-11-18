@@ -87,8 +87,8 @@
             case ZDBBL of
                 undefined -> undefined;
                 X when is_integer(X) -> cuttlefish_util:ceiling(X / 1024); %% Bytes to Kilobytes;
-            _ -> undefined
-        end
+                _ -> undefined
+            end
     end
 }.
 
@@ -189,55 +189,31 @@
 {translation,
     "lager.handlers",
     fun(Conf) ->
-            ErrorHandler = case cuttlefish:conf_get("log.error.file", Conf)
-                of
+            ErrorHandler = case cuttlefish:conf_get("log.error.file", Conf) of
                 undefined -> [];
-                ErrorFilename -> [{lager_file_backend, [{file, ErrorFilename},
+                ErrorFilename -> [{lager_file_backend, [
+                                {file, ErrorFilename},
                                 {level, error},
-                                {size,
-                                    10485760},
-                                {date,
-                                    "$D0"},
-                                {count,
-                                    5}]}]
+                                {size, 10485760},
+                                {date, "$D0"},
+                                {count, 5}]}]
             end,
 
-            ConsoleLogLevel
-            =
-            cuttlefish:conf_get("log.console.level",
-                Conf),
-            ConsoleLogFile
-            =
-            cuttlefish:conf_get("log.console.file",
-                Conf),
+            ConsoleLogLevel = cuttlefish:conf_get("log.console.level", Conf),
+            ConsoleLogFile = cuttlefish:conf_get("log.console.file", Conf),
 
-            ConsoleHandler
-            =
-            {lager_console_backend,
-                ConsoleLogLevel},
-            ConsoleFileHandler
-            =
+            ConsoleHandler = {lager_console_backend, ConsoleLogLevel},
+            ConsoleFileHandler =
             {lager_file_backend,
-                [{file,
-                        ConsoleLogFile},
-                    {level,
-                        ConsoleLogLevel},
-                    {size,
-                        10485760},
-                    {date,
-                        "$D0"},
-                    {count,
-                        5}]},
+                [{file, ConsoleLogFile},
+                    {level, ConsoleLogLevel},
+                    {size, 10485760},
+                    {date, "$D0"},
+                    {count, 5}]},
 
-            ConsoleHandlers
-            =
-            case
-                cuttlefish:conf_get("log.console",
-                    Conf)
-                of
-                off
-                ->
-                    [];
+            ConsoleHandlers =
+            case cuttlefish:conf_get("log.console", Conf) of
+                off -> [];
                 file -> [ConsoleFileHandler];
                 console -> [ConsoleHandler];
                 both -> [ConsoleHandler, ConsoleFileHandler];
@@ -433,22 +409,12 @@
                                 all_but_first, list}]),
                     list_to_integer(N) / 100
             end,
-            Opts = [{type, cuttlefish:conf_get("mqtt.queue.type",
-                        Conf, simple)},
-                {max_length,
-                    cuttlefish:conf_get("mqtt.queue.max_length", Conf)},
-                {low_watermark,
-                    Parse(cuttlefish:conf_get("mqtt.queue.low_watermark",
-                            Conf))},
-                {high_watermark,
-                    Parse(cuttlefish:conf_get("mqtt.queue.high_watermark",
-                            Conf))},
-                {queue_qos0,
-                    cuttlefish:conf_get("mqtt.queue.qos0", Conf)}],
-            case
-                cuttlefish:conf_get("mqtt.queue.priority",
-                    Conf)
-                of
+            Opts = [{type, cuttlefish:conf_get("mqtt.queue.type", Conf, simple)},
+                {max_length, cuttlefish:conf_get("mqtt.queue.max_length", Conf)},
+                {low_watermark, Parse(cuttlefish:conf_get("mqtt.queue.low_watermark", Conf))},
+                {high_watermark, Parse(cuttlefish:conf_get("mqtt.queue.high_watermark", Conf))},
+                {queue_qos0, cuttlefish:conf_get("mqtt.queue.qos0", Conf)}],
+            case cuttlefish:conf_get("mqtt.queue.priority", Conf) of
                 undefined
                 ->
                     Opts;
@@ -720,15 +686,9 @@
             end,
 
             Listeners = fun(Name) when is_atom(Name) ->
-                    Key = "mqtt.listener."
-                    ++ atom_to_list(Name),
-                    case
-                        cuttlefish:conf_get(Key,
-                            Conf,
-                            undefined) of
-                        undefined
-                        ->
-                            [];
+                    Key = "mqtt.listener." ++ atom_to_list(Name),
+                    case cuttlefish:conf_get(Key, Conf, undefined) of
+                        undefined -> [];
                         Port ->
                             ConnOpts =
                             Filter([{rate_limit,
@@ -738,26 +698,13 @@
                                             Conf,
                                             undefined)}]),
                             Opts =
-                            [{connopts,
-                                    ConnOpts},
-                                {sockopts,
-                                    TcpOpts(Key)}
-                                | LisOpts(Key)],
+                            [{connopts, ConnOpts},
+                                {sockopts, TcpOpts(Key)} | LisOpts(Key)],
                             [{Name, Port,
-                                    case Name
-                                        =:= ssl
-                                        orelse
-                                        Name
-                                        =:=
-                                        https
-                                        of
-                                        true
-                                        ->
-                                            [{ssl,
-                                                    SslOpts(Key)}
-                                                | Opts];
-                                        false
-                                        ->
+                                    case Name =:= ssl orelse Name =:= https of
+                                        true ->
+                                            [{ssl, SslOpts(Key)} | Opts];
+                                        false ->
                                             Opts
                                     end}]
                     end
@@ -897,52 +844,26 @@
             end,
 
             Listeners = fun(Name) when is_atom(Name) ->
-                    Key = "chat.listener."
-                    ++ atom_to_list(Name),
-                    case
-                        cuttlefish:conf_get(Key,
-                            Conf,
-                            undefined) of
+                    Key = "chat.listener." ++ atom_to_list(Name),
+                    case cuttlefish:conf_get(Key, Conf, undefined) of
                         undefined
                         ->
                             [];
                         Port ->
-                            ConnOpts =
-                            Filter([{rate_limit,
-                                        cuttlefish:conf_get(Key
-                                            ++
-                                            ".rate_limit",
-                                            Conf,
-                                            undefined)}]),
+                            ConnOpts = Filter([{rate_limit, cuttlefish:conf_get(Key ++ ".rate_limit", Conf, undefined)}]),
                             Opts =
-                            [{connopts,
-                                    ConnOpts},
-                                {sockopts,
-                                    TcpOpts(Key)}
-                                | LisOpts(Key)],
+                            [{connopts, ConnOpts},
+                             {sockopts, TcpOpts(Key)} | LisOpts(Key)],
                             [{Name, Port,
-                                    case Name
-                                        =:= ssl
-                                        orelse
-                                        Name
-                                        =:=
-                                        https
-                                        of
-                                        true
-                                        ->
-                                            [{ssl,
-                                                    SslOpts(Key)}
-                                                | Opts];
-                                        false
-                                        ->
+                                    case Name =:= ssl orelse Name =:= https of
+                                        true ->
+                                            [{ssl, SslOpts(Key)} | Opts];
+                                        false ->
                                             Opts
                                     end}]
                     end
             end,
-            lists:append([Listeners(tcp),
-                    Listeners(ssl),
-                    Listeners(http),
-                    Listeners(https)])
+            lists:append([Listeners(tcp), Listeners(ssl), Listeners(http), Listeners(https)])
     end}.
 
 
