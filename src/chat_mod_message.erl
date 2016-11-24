@@ -15,18 +15,26 @@ load(Opts) ->
 message_published(Message = #mqtt_message{
         id = MsgId, qos = 1,
         from = {ClientId, Username},
-        topic = Topic = <<"/sys/", _To/binary>>,
-        payload = PayLoad}, _Opts) ->
+        topic = Topic,
+        payload = PayLoad}, _Opts) when Topic =:= <<"/sys/", ClientId/binary, "/w">> ->
 
-    Data = chat_json:decode(binary_to_list(PayLoad)),
-    lager:info("chat message : ~p~n", [{Data}]),
-    case emqttd_cm:lookup(ClientId) of
-        #mqtt_client{username = Username} ->
-            SyncKey = #chat_synckey{client = ClientId, username = Username, pubsub = publish, topic = Topic},
-            chat_sync:store(SyncKey, MsgId);
-        undefined ->
-            lager:error("cannot find client: ~s", [ClientId])
+    {ok, Json} = chat_json:decode(binary_to_list(PayLoad)),
+    lager:info("chat message : ~p~n", [{Json}]),
+    Fun = fun(Msg) ->
+            Code = proplists:get_value(<<"code">>, Msg),
+            Data = proplists:get_value(<<"data">>, Msg),
+            %% 分发到不同模块
+            chat_event:emit(Code, Data)
     end,
+    lists:foreach(Fun, Json),
+
+%%    case emqttd_cm:lookup(ClientId) of
+%%        #mqtt_client{username = Username} ->
+%%            SyncKey = #chat_synckey{client = ClientId, username = Username, pubsub = publish, topic = Topic},
+%%            chat_sync:store(SyncKey, MsgId);
+%%        undefined ->
+%%            lager:error("cannot find client: ~s", [ClientId])
+%%    end,
     {ok, Message};
 
 message_published(Message, _Opts) ->

@@ -88,8 +88,7 @@ to_list(#chat_room{name = Name, nick = Nick}) ->
 %%%=============================================================================
 
 with_backend(Fun, Args) ->
-    %{ok, {Backend, _Env}} = application:get_env(chat, backend, {mnesia, []}),
-    Backend = mnesia,
+    {Backend, _Env} = application:get_env(chat, backend, {mnesia, []}),
     apply(backend_mod(Backend), Fun, Args).
 
 backend_mod(Backend) ->

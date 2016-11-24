@@ -783,7 +783,6 @@
         {datatype, string}
     ]}.
 
-
 {mapping, "chat.listener.http", "chat.listeners", [
         {default, 1883},
         {datatype, [integer, ip]}
@@ -803,68 +802,100 @@
 {translation, "chat.listeners", fun(Conf) ->
             Filter  = fun(Opts) -> [{K, V} || {K, V} <- Opts, V =/= undefined] end,
             LisOpts = fun(Prefix) ->
-                    Filter([{acceptors,
-                                cuttlefish:conf_get(Prefix ++
-                                    ".acceptors", Conf)},
-                            {max_clients,
-                                cuttlefish:conf_get(Prefix ++ ".max_clients", Conf)},
-                            {rate_limt,   cuttlefish:conf_get(Prefix ++
-                                    ".rate_limit", Conf, undefined)}])
+                    Filter([{acceptors, cuttlefish:conf_get(Prefix ++ ".acceptors", Conf)},
+                            {max_clients, cuttlefish:conf_get(Prefix ++ ".max_clients", Conf)},
+                            {rate_limt,   cuttlefish:conf_get(Prefix ++ ".rate_limit", Conf, undefined)}])
             end,
             TcpOpts = fun(Prefix) ->
-                    Filter([{backlog,
-                                cuttlefish:conf_get(Prefix
-                                    ++ ".backlog", Conf,
-                                    undefined)},
-                            {recbuf,
-                                cuttlefish:conf_get(Prefix ++ ".recbuf", Conf, undefined)},
-                            {sndbuf,  cuttlefish:conf_get(Prefix ++ ".sndbuf",
-                                    Conf, undefined)},
-                            {buffer,
-                                cuttlefish:conf_get(Prefix ++ ".buffer", Conf, undefined)},
-                            {nodelay, cuttlefish:conf_get(Prefix ++ ".nodelay",
-                                    Conf, true)}])
+                    Filter([{backlog, cuttlefish:conf_get(Prefix ++ ".backlog", Conf, undefined)},
+                            {recbuf, cuttlefish:conf_get(Prefix ++ ".recbuf", Conf, undefined)},
+                            {sndbuf,  cuttlefish:conf_get(Prefix ++ ".sndbuf", Conf, undefined)},
+                            {buffer, cuttlefish:conf_get(Prefix ++ ".buffer", Conf, undefined)},
+                            {nodelay, cuttlefish:conf_get(Prefix ++ ".nodelay", Conf, true)}])
             end,
             SslOpts = fun(Prefix) ->
-                    Filter([{handshake_timeout,
-                                cuttlefish:conf_get(Prefix
-                                    ++
-                                    ".handshake_timeout",
-                                    Conf) * 1000},
-                            {keyfile,
-                                cuttlefish:conf_get(Prefix ++ ".keyfile", Conf, undefined)},
-                            {certfile,   cuttlefish:conf_get(Prefix ++
-                                    ".certfile", Conf, undefined)},
-                            {cacertfile,
-                                cuttlefish:conf_get(Prefix ++ ".cacertfile", Conf, undefined)},
-                            {verify,     cuttlefish:conf_get(Prefix ++ ".verify",
-                                    Conf, undefined)},
-                            {fail_if_no_peer_cert,
-                                cuttlefish:conf_get(Prefix ++ ".fail_if_no_peer_cert", Conf, undefined)}])
+                    Filter([{handshake_timeout, cuttlefish:conf_get(Prefix ++ ".handshake_timeout", Conf) * 1000},
+                            {keyfile, cuttlefish:conf_get(Prefix ++ ".keyfile", Conf, undefined)},
+                            {certfile,   cuttlefish:conf_get(Prefix ++ ".certfile", Conf, undefined)},
+                            {cacertfile, cuttlefish:conf_get(Prefix ++ ".cacertfile", Conf, undefined)},
+                            {verify,     cuttlefish:conf_get(Prefix ++ ".verify", Conf, undefined)},
+                            {fail_if_no_peer_cert, cuttlefish:conf_get(Prefix ++ ".fail_if_no_peer_cert", Conf, undefined)}])
             end,
 
             Listeners = fun(Name) when is_atom(Name) ->
                     Key = "chat.listener." ++ atom_to_list(Name),
                     case cuttlefish:conf_get(Key, Conf, undefined) of
-                        undefined
-                        ->
+                        undefined ->
                             [];
                         Port ->
                             ConnOpts = Filter([{rate_limit, cuttlefish:conf_get(Key ++ ".rate_limit", Conf, undefined)}]),
-                            Opts =
-                            [{connopts, ConnOpts},
-                             {sockopts, TcpOpts(Key)} | LisOpts(Key)],
-                            [{Name, Port,
-                                    case Name =:= ssl orelse Name =:= https of
-                                        true ->
-                                            [{ssl, SslOpts(Key)} | Opts];
-                                        false ->
-                                            Opts
-                                    end}]
+                            Opts = [{connopts, ConnOpts}, {sockopts, TcpOpts(Key)} | LisOpts(Key)],
+                            [{Name, Port, case Name =:= ssl orelse Name =:= https of true -> [{ssl, SslOpts(Key)} | Opts]; false -> Opts end}]
                     end
             end,
             lists:append([Listeners(tcp), Listeners(ssl), Listeners(http), Listeners(https)])
     end}.
 
+%%--------------------------------------------------------------------
+%% chat MYSQL
+%%--------------------------------------------------------------------
+{mapping, "chat.backend.mysql.host", "chat.backend", [
+        {default, "localhost"},
+        {datatype, string}
+    ]}.
 
+{mapping, "chat.backend.mysql.port", "chat.backend", [
+        {default, 3306},
+        {datatype, integer}
+    ]}.
 
+{mapping, "chat.backend.mysql.database", "chat.backend", [
+        {default, "chat"},
+        {datatype, string}
+    ]}.
+
+{mapping, "chat.backend.mysql.username", "chat.backend", [
+        {default, "root"},
+        {datatype, string}
+    ]}.
+
+{mapping, "chat.backend.mysql.password", "chat.backend", [
+        {default, "123456"},
+        {datatype, string}
+    ]}.
+
+{mapping, "chat.backend.mysql.encoding", "chat.backend", [
+        {default, "utf8"},
+        {datatype, string}
+    ]}.
+
+{translation, "chat.backend", fun(Conf) ->
+    {mysql, [
+            {host, cuttlefish:conf_get("chat.backend.mysql.host", Conf)},
+            {port, cuttlefish:conf_get("chat.backend.mysql.port", Conf)},
+            {database, cuttlefish:conf_get("chat.backend.mysql.database", Conf)},
+            {username, cuttlefish:conf_get("chat.backend.mysql.username", Conf)},
+            {password, cuttlefish:conf_get("chat.backend.mysql.password", Conf)},
+            {encoding, cuttlefish:conf_get("chat.backend.mysql.encoding", Conf)}
+        ]}
+    end}.
+
+%%--------------------------------------------------------------------
+%% chat pools
+%%--------------------------------------------------------------------
+{mapping, "chat.mysql_pool.size", "chat.mysql_pool", [
+        {default, 10},
+        {datatype, integer}
+    ]}.
+
+{mapping, "chat.mysql_pool.max_overflow", "chat.mysql_pool", [
+        {default, 20},
+        {datatype, integer}
+    ]}.
+
+{translation, "chat.mysql_pool", fun(Conf) ->
+        [
+        {size, cuttlefish:conf_get("chat.mysql_pool.size", Conf)},
+        {max_overflow, cuttlefish:conf_get("chat.mysql_pool.max_overflow", Conf)}
+        ]
+    end}.

@@ -51,10 +51,10 @@ init([Uuid, Friend]) ->
                                  {reconnect, 0},
                                  {username, Username},
                                  {logger, {console, info}}]),
-    Data= [{code, 100000},
+    Data= [[{code, 100000},
            {data, [{uid, Uuid},
                    {name, ""},
-                   {passwd, ""}]}],
+                   {passwd, ""}]}]],
 
     Json = mochijson2:encode(Data),
     Payload = list_to_binary(Json),
@@ -64,9 +64,9 @@ init([Uuid, Friend]) ->
 
 handle_call({add_friend, FriendUid}, _From, State = #state{mqttc   = C,
                                                            client   = Uidstr}) ->
-    Data= [{code, 101000},
-           {data, [{uid, FriendUid},
-                   {reason, ""}]}],
+    Data= [[{code, 101000},
+            {data, [{uid, FriendUid},
+                    {reason, ""}]}]],
     Json = mochijson2:encode(Data),
     Payload = list_to_binary(Json),
     emqttc:publish(C, <<"/sys/", Uidstr/binary, "/w">>, Payload, [{qos, 1}]),
@@ -94,37 +94,37 @@ handle_info(chat_to_friend, State = #state{mqttc    = C,
     FriendUid= erlang:integer_to_binary(Friend),
     Msg = "hellooooooo",
     Msgid = 1,
-    Data = [
-        {code, 102000},
-        {data, [
-                {ret, 0},
-                {msg, ""},
-                {fromuid, Uid},
-                {fromname, Username},
-                {touid, FriendUid},
-                {msgtype, 1},
-                {msgdata, [
-                        {direct, 0},
-                        {fromId, Uid},
-                        {body, [
-                                {type, 1},
-                                {text, Msg}
-                            ]},
-                        {toId, FriendUid},
-                        {status, 1},
-                        {type, 1},
-                        {convsId, "s_123"},
-                        {time, chat_misc:now_to_secs()},
-                        {isAcked, false},
-                        {msgId, Msgid},
-                        {fromName, Username},
-                        {isDelivered, false},
-                        {convsType, 1},
-                        {isRead, true}
-                    ]},
-                {msgid, Msgid}
-            ]}
-    ],
+    Data = [[
+            {code, 102000},
+            {data, [
+                    {ret, 0},
+                    {msg, ""},
+                    {fromuid, Uid},
+                    {fromname, Username},
+                    {touid, FriendUid},
+                    {msgtype, 1},
+                    {msgdata, [
+                            {direct, 0},
+                            {fromId, Uid},
+                            {body, [
+                                    {type, 1},
+                                    {text, Msg}
+                                ]},
+                            {toId, FriendUid},
+                            {status, 1},
+                            {type, 1},
+                            {convsId, "s_123"},
+                            {time, chat_misc:now_to_secs()},
+                            {isAcked, false},
+                            {msgId, Msgid},
+                            {fromName, Username},
+                            {isDelivered, false},
+                            {convsType, 1},
+                            {isRead, true}
+                        ]},
+                    {msgid, Msgid}
+                ]}
+        ]],
     Json = mochijson2:encode(Data),
     Payload = list_to_binary(Json),
     emqttc:publish(C, <<"/sys/", FriendUid/binary, "/w">>, Payload, [{qos, 1}]),

@@ -6,6 +6,7 @@ broker() ->
     {ok, Addr} = application:get_env(chat, broker), Addr.
 
 load() ->
+    chat_event:load(),
     chat_backend:load(),
     chat_mod_message:load([]),
     chat_mod_presence:load([]),

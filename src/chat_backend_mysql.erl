@@ -13,12 +13,18 @@
 -export([find_contacts/1, find_rooms/1, find_offline_msg/1]).
 
 onload() ->
-    {ok, {mysql, Env}} = application:get_env(chat, backend),
-    lager:info("mysql env : ~p~n", [Env]),
+    {ok, PoolArgs} = application:get_env(chat, mysql_pool),
+    {ok, {mysql, MysqlArgs}} = application:get_env(chat, backend),
+    poolboy:child_spec(PoolName, PoolArgs, MysqlArgs),
+    lager:info("mysql pool start success !: ~p~n", [{PoolArgs, MysqlArgs}]),
     ok.
 
 find_contacts(Username) ->
-    [].
+    StatementRef = "SHOW TABLES;",
+    Params = [],
+    poolboy:transaction(mysql_pool, fun(MysqlConn) ->
+                mysql:execute(MysqlConn, StatementRef, Params)
+        end).
 
 find_rooms(Username) ->
     [].
