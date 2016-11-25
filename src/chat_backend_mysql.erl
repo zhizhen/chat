@@ -15,8 +15,10 @@
 onload() ->
     {ok, PoolArgs} = application:get_env(chat, mysql_pool),
     {ok, {mysql, MysqlArgs}} = application:get_env(chat, backend),
-    poolboy:child_spec(PoolName, PoolArgs, MysqlArgs),
-    lager:info("mysql pool start success !: ~p~n", [{PoolArgs, MysqlArgs}]),
+    PoolArgs1 = [{strategy, fifo}, {name, {local, mysql_pool}}, {worker_module, mysql}| PoolArgs],
+    PoolSpec = poolboy:child_spec(mysql_pool, PoolArgs1, MysqlArgs),
+    supervisor:start_child(chat_sup, PoolSpec),
+    lager:info("mysql pool start success !: ~p~n", [{PoolSpec}]),
     ok.
 
 find_contacts(Username) ->

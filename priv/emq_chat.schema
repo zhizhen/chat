@@ -854,7 +854,7 @@
         {datatype, string}
     ]}.
 
-{mapping, "chat.backend.mysql.username", "chat.backend", [
+{mapping, "chat.backend.mysql.user", "chat.backend", [
         {default, "root"},
         {datatype, string}
     ]}.
@@ -874,7 +874,7 @@
             {host, cuttlefish:conf_get("chat.backend.mysql.host", Conf)},
             {port, cuttlefish:conf_get("chat.backend.mysql.port", Conf)},
             {database, cuttlefish:conf_get("chat.backend.mysql.database", Conf)},
-            {username, cuttlefish:conf_get("chat.backend.mysql.username", Conf)},
+            {user, cuttlefish:conf_get("chat.backend.mysql.user", Conf)},
             {password, cuttlefish:conf_get("chat.backend.mysql.password", Conf)},
             {encoding, cuttlefish:conf_get("chat.backend.mysql.encoding", Conf)}
         ]}
