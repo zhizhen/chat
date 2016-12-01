@@ -1,10 +1,20 @@
 -define(EMPTY(Field), ((Field =:= undefined) orelse (Field =:= <<>>))).
--record(chat_contact, {username, nick,
-                       group = <<"friend">>,
-                       presence = offline,
-                       show = unavailable,
-                       status = <<"">>,
-                       avatar}).
+%% -record(chat_contact, {username, nick,
+%%                        group = <<"friend">>,
+%%                        presence = offline,
+%%                        show = unavailable,
+%%                        status = <<"">>,
+%%                        avatar}).
+-record(chat_user, {client, 
+		    is_login,
+		    token,
+		    lastlogintime
+		   }).
+
+-record(chat_channel, {id, name,
+		       type, savetype,
+		       admin_uid, index,
+		       uids}).
 
 -record(chat_roster, {uname, cname}).
 

@@ -51,7 +51,7 @@ handle_call({login_many, N}, _From, #{uid := Uid, robots := Robots} = State) ->
                 gen_server:call(Pid, {add_friend, FriendUid}),
                 Robot = #robot{uid = X, friend = FriendUid, pid = Pid},
                 Robot
-        end|| X <- lists:seq(Uid, Uid + N)],
+        end|| X <- lists:seq(Uid + 1, Uid + N)],
     {reply, Robots1, State#{uid => Uid + N, robots => Robots ++ Robots1}};
 handle_call(stop, _From, State) ->
     {stop, normal, ok, State};

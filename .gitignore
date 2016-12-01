@@ -13,3 +13,4 @@ _rel/
 chat.d
 .erlang.mk/
 data/
+*~

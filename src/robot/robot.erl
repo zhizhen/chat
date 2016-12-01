@@ -51,6 +51,7 @@ init([Uuid, Friend]) ->
                                  {reconnect, 0},
                                  {username, Username},
                                  {logger, {console, info}}]),
+    emqttc:subscribe(C, <<"/sys/", Uidstr/binary, "/r">>, 0),
     Data= [[{code, 100000},
            {data, [{uid, Uuid},
                    {name, ""},

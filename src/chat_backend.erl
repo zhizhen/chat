@@ -8,7 +8,7 @@
 
 -export([store_message/1, ack_message/2, sync_messages/2]).
 
--export([to_list/1]).
+%%-export([to_list/1]).
 
 -ifdef(use_specs).
 
@@ -69,19 +69,19 @@ sync_messages(SyncKey, Offset) ->
 unload() ->
     with_backend(onunload, []).
 
-to_list(#chat_contact{username = Name,
-                          nick = Nick,
-                          group = Group,
-                          presence = Presence,
-                          show = Show,
-                          status = Status}) ->
-    [{id, Name}, {nick, Nick},
-     {group, Group},
-     {presence, Presence},
-     {show, Show}, {status, Status}];
+%% to_list(#chat_contact{username = Name,
+%%                           nick = Nick,
+%%                           group = Group,
+%%                           presence = Presence,
+%%                           show = Show,
+%%                           status = Status}) ->
+%%     [{id, Name}, {nick, Nick},
+%%      {group, Group},
+%%      {presence, Presence},
+%%      {show, Show}, {status, Status}];
 
-to_list(#chat_room{name = Name, nick = Nick}) ->
-    [{id, Name}, {nick, Nick}, {avatar, <<"">>}].
+%% to_list(#chat_room{name = Name, nick = Nick}) ->
+%%     [{id, Name}, {nick, Nick}, {avatar, <<"">>}].
 
 %%%=============================================================================
 %%% Internal functions
