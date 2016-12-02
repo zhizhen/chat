@@ -52,10 +52,10 @@ join(Data) ->
     #mqtt_client{client_pid = ClientPid} = erlang:get(mqttc),
     emqttd_client:subscribe(ClientPid, [{<<"/chat/channel/", ChannelId/binary>>, 0}]),
     
-    RetData = [{code, 104004},
+    RetData = [[{code, 104004},
 	       {data, [{ret, 0},
 		       {id, null},
-		       {msg, "加入频道"},
+		       {msg, unicode:characters_to_binary( "加入频道")},
 		       {fromuid, Uuid},
 		       {ownerid, AdminId},
 		       {channelid, ChannelId},
@@ -64,12 +64,12 @@ join(Data) ->
 		       {savetype, SaveType},
 		       {uids, [{uid, Uuid}, {name, UserName}]}
                       ]
-	       }],
+	       }]],
 
     Json = mochijson2:encode(RetData),
     Payload = list_to_binary(Json),
 
     emqttd:publish(
-      emqttd_message:make(Uuid, qos0, <<"/chat/channel/", ChannelId/binary>>, Payload)
+      emqttd_message:make(Uuid, qos0, <<"/sys/", Uuid/binary, "/r">>, Payload)
      ),
     ok.
